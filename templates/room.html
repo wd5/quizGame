@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room {{ room_number }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.8.3.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/timer.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            if ("WebSocket" in window)
+            {
+                var $answer_button = $('#answer_button');
+                $answer_button.click(function()
+                {
+                    var data = {
+                        type: 'answer',
+                        room: {{ room_number }},
+                        user: '4qwee'
+                    };
+                    ws.send(JSON.stringify(data));
+                });
+
+                ws = new WebSocket("ws://" + document.domain + ":5000/roomWS");
+                ws.onopen = function()
+                {
+                    var data = {
+                        type: 'start',
+                        room: {{ room_number }}
+                    };
+                    ws.send(JSON.stringify(data));
+                };
+                ws.onmessage = function(event)
+                {
+                    var data = event.data;
+                    console.log(data);
+
+                    if (data == 'startQuiz')
+                    {
+                        $answer_button.show();
+                        startTimer($('#cont'), function()
+                        {
+                            $answer_button.hide();
+                        });
+                    }
+                };
+            }
+            else
+            {
+                alert("WebSocket not supported");
+            }
+        });
+    </script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div id="cont" class="span6 offset3"></div>
+    </div>
+    <div class="row-fluid">
+        <div class="span2 offset5">
+            <button id="answer_button" class="btn btn-danger btn-block btn-large" style="display: none">Answer</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

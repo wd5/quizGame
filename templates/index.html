@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rooms</title>
+</head>
+<body>
+    {% for room in rooms_keys %}
+        <a href="{{ url_for('room', room=room) }}">{{ room }}</a>
+    {% else %}
+        No rooms! Sorry!
+    {% endfor %}
+</body>
+</html>
