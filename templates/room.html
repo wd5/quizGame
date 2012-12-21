@@ -14,7 +14,7 @@
                 $answer_button.click(function()
                 {
                     var data = {
-                        type: 'answer',
+                        type: '{{ ANSWER_ACTION_MESSAGE }}',
                         room: {{ room_number }},
                         user: '4qwee'
                     };
@@ -25,7 +25,7 @@
                 ws.onopen = function()
                 {
                     var data = {
-                        type: 'start',
+                        type: '{{ START_LISTENING_MESSAGE }}',
                         room: {{ room_number }}
                     };
                     ws.send(JSON.stringify(data));
@@ -35,7 +35,7 @@
                     var data = JSON.parse(event.data);
                     console.log(data);
 
-                    if (data.type == 'startQuiz')
+                    if (data.type == '{{ QUESTION_MESSAGE }}')
                     {
                         $answer_button.show();
                         startTimer($('#cont'), function()

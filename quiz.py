@@ -3,8 +3,13 @@ from geventwebsocket.handler import WebSocketHandler
 from gevent.pywsgi import WSGIServer
 import simplejson
 import Messages
+import quiz_globals
 
 app = Flask(__name__)
+
+all_constants = [item for item in dir(quiz_globals) if not item.startswith('__')]
+for constant in all_constants:
+    app.jinja_env.globals[constant] = getattr(quiz_globals, constant)
 
 rooms = {}
 

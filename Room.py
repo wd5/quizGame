@@ -1,7 +1,6 @@
 import threading
 import simplejson
-
-__author__ = 'atanana'
+import quiz_globals
 
 class Room():
     def __init__(self):
@@ -24,13 +23,13 @@ class Room():
             player.send(data)
 
     def start_quiz(self):
-        self._send_all_players(simplejson.dumps(dict(type='startQuiz')))
+        self._send_all_players(simplejson.dumps(dict(type=quiz_globals.QUESTION_MESSAGE)))
 
         threading.Timer(12, self.show_answer).start()
 
 
     def show_answer(self):
-        self._send_all_players(simplejson.dumps(dict(type='answer', answer='answer')))
+        self._send_all_players(simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE, answer='answer')))
 
         if self.players_count():
             threading.Timer(5, self.start_quiz).start()
