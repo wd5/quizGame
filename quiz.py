@@ -30,7 +30,8 @@ def rooms_ws():
                 break
             else:
                 message = simplejson.loads(message)
-                Messages.handle_message(message, ws)
+                room_number = int(message['room'])
+                Messages.handle_message(message, room_number, ws)
 
     return
 

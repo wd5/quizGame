@@ -32,10 +32,10 @@
                 };
                 ws.onmessage = function(event)
                 {
-                    var data = event.data;
+                    var data = JSON.parse(event.data);
                     console.log(data);
 
-                    if (data == 'startQuiz')
+                    if (data.type == 'startQuiz')
                     {
                         $answer_button.show();
                         startTimer($('#cont'), function()

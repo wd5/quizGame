@@ -11,7 +11,6 @@ def _get_room(room_number):
 
 def handle_message(message, room_number, ws):
     message_type = message['type']
-    room_number = int(message['room'])
     room = _get_room(room_number)
 
     if message_type == 'start':
@@ -21,7 +20,7 @@ def handle_message(message, room_number, ws):
             rooms[room_number] = room
 
     elif message_type == 'answer':
-        room
+        pass
         
 
 def handle_disconnect(room_number, ws):
