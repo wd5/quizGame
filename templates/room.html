@@ -4,7 +4,6 @@
     <title>Room {{ room_number }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.8.3.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/timer.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
@@ -14,7 +13,7 @@
                 $answer_button.click(function()
                 {
                     var data = {
-                        type: '{{ ANSWER_ACTION_MESSAGE }}',
+                        type: '{{ ANSWER_QUERY_MESSAGE_TO_SERVER }}',
                         room: {{ room_number }},
                         user: '4qwee'
                     };
@@ -25,7 +24,7 @@
                 ws.onopen = function()
                 {
                     var data = {
-                        type: '{{ START_LISTENING_MESSAGE }}',
+                        type: '{{ START_LISTENING_MESSAGE_TO_SERVER }}',
                         room: {{ room_number }}
                     };
                     ws.send(JSON.stringify(data));
@@ -34,14 +33,29 @@
                 {
                     var data = JSON.parse(event.data);
                     console.log(data);
+                    console.log(new Date());
 
-                    if (data.type == '{{ QUESTION_MESSAGE }}')
+                    if (data.type == '{{ QUESTION_MESSAGE_TO_CLIENT }}')
                     {
-                        $answer_button.show();
-                        startTimer($('#cont'), function()
+                        var $progress_bar = $('#progress_bar');
+                        var progress = 0;
+                        $progress_bar.css('width', 0);
+                        $answer_button.removeAttr('disabled');
+                        var timerInterval = setInterval(function()
                         {
-                            $answer_button.hide();
-                        });
+                            progress += 10;
+                            $progress_bar.css('width', progress + '%');
+
+                            if (progress == 100)
+                            {
+                                clearInterval(timerInterval);
+                                $answer_button.attr('disabled', 'disabled');
+                            }
+                        }, 1000);
+                    }
+                    else if (data.type == '{{ STOP_ANSWER_MESSAGE_TO_CLIENT }}')
+                    {
+                        $answer_button.attr('disabled', 'disabled');
                     }
                 };
             }
@@ -55,11 +69,15 @@
 <body>
 <div class="container-fluid">
     <div class="row-fluid">
-        <div id="cont" class="span6 offset3"></div>
+        <div id="cont" class="span6 offset3">
+            <div class="progress progress-striped active">
+                <div class="bar" style="width: 0" id="progress_bar"></div>
+            </div>
+        </div>
     </div>
     <div class="row-fluid">
         <div class="span2 offset5">
-            <button id="answer_button" class="btn btn-danger btn-block btn-large" style="display: none">Answer</button>
+            <button id="answer_button" class="btn btn-danger btn-block btn-large">Answer</button>
         </div>
     </div>
 </div>

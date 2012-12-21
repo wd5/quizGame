@@ -14,14 +14,14 @@ def handle_message(message, room_number, ws):
     message_type = message['type']
     room = _get_room(room_number)
 
-    if message_type == quiz_globals.START_LISTENING_MESSAGE:
+    if message_type == quiz_globals.START_LISTENING_MESSAGE_TO_SERVER:
         room.add_player(ws)
 
         if room_number not in rooms:
             rooms[room_number] = room
 
-    elif message_type == quiz_globals.ANSWER_ACTION_MESSAGE:
-        pass
+    elif message_type == quiz_globals.ANSWER_QUERY_MESSAGE_TO_SERVER:
+        room.wait_answer(ws)
         
 
 def handle_disconnect(room_number, ws):

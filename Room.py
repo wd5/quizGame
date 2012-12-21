@@ -2,9 +2,14 @@ import threading
 import simplejson
 import quiz_globals
 
+def _get_simple_json_message(message):
+    return simplejson.dumps(dict(type=message))
+
 class Room():
     def __init__(self):
         self._players = []
+        self._question_timer = None
+
 
     def add_player(self, player):
         self._players.append(player)
@@ -12,24 +17,40 @@ class Room():
         if self.players_count() == 1:
             self.start_quiz()
 
+
     def players_count(self):
         return len(self._players)
 
+
     def remove_player(self, player):
         self._players.remove(player)
+
 
     def _send_all_players(self, data):
         for player in self._players:
             player.send(data)
 
-    def start_quiz(self):
-        self._send_all_players(simplejson.dumps(dict(type=quiz_globals.QUESTION_MESSAGE)))
 
-        threading.Timer(12, self.show_answer).start()
+    def _send_all_players_except_one(self, except_player, data):
+        for player in self._players:
+            if player != except_player:
+                player.send(data)
+
+
+    def start_quiz(self):
+        self._send_all_players(_get_simple_json_message(quiz_globals.QUESTION_MESSAGE_TO_CLIENT))
+        self._question_timer = threading.Timer(12, self.show_answer)
+        self._question_timer.start()
 
 
     def show_answer(self):
-        self._send_all_players(simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE, answer='answer')))
+        self._send_all_players(simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE_TO_CLIENT, answer='answer')))
 
         if self.players_count():
-            threading.Timer(5, self.start_quiz).start()
+            self._question_timer = threading.Timer(5, self.start_quiz)
+            self._question_timer.start()
+
+
+    def wait_answer(self, player):
+        self._question_timer.cancel()
+        self._send_all_players_except_one(player, _get_simple_json_message(quiz_globals.STOP_ANSWER_MESSAGE_TO_CLIENT))
