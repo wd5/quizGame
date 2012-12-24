@@ -38,7 +38,8 @@ class Room():
 
 
     def start_quiz(self):
-        self._send_all_players(_get_simple_json_message(quiz_globals.QUESTION_MESSAGE_TO_CLIENT))
+        question_data = simplejson.dumps(dict(type = quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic='some topic', question='some question'))
+        self._send_all_players(question_data)
         self._question_timer = threading.Timer(12, self.show_answer)
         self._question_timer.start()
 
@@ -49,6 +50,10 @@ class Room():
         if self.players_count():
             self._question_timer = threading.Timer(5, self.start_quiz)
             self._question_timer.start()
+
+
+    def handle_player_answer(self, player, is_correct):
+        pass
 
 
     def wait_answer(self, player):

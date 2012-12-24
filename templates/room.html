@@ -41,6 +41,10 @@
                         var progress = 0;
                         $progress_bar.css('width', 0);
                         $answer_button.removeAttr('disabled');
+
+                        $('#topic-span').text(data.topic);
+                        $('#question-span').text(data.question);
+
                         var timerInterval = setInterval(function()
                         {
                             progress += 10;
@@ -69,15 +73,20 @@
 <body>
 <div class="container-fluid">
     <div class="row-fluid">
-        <div id="cont" class="span6 offset3">
+        <div class="span6 offset3 well" style="margin-top: 30pt">
             <div class="progress progress-striped active">
                 <div class="bar" style="width: 0" id="progress_bar"></div>
+            </div>
+
+            <div class="lead">
+                <strong id='topic-span'></strong>
+                <p id="question-span">Обождите. Сейчас машина придумает вам вопрос
             </div>
         </div>
     </div>
     <div class="row-fluid">
         <div class="span2 offset5">
-            <button id="answer_button" class="btn btn-danger btn-block btn-large">Answer</button>
+            <button id="answer_button" class="btn btn-danger btn-block btn-large">Ответ</button>
         </div>
     </div>
 </div>
