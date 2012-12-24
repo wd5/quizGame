@@ -1,5 +1,5 @@
 from quiz import rooms
-from Room import Room
+from room import Room
 import quiz_globals
 
 def _get_room(room_number):

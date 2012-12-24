@@ -1,6 +1,7 @@
 import threading
 import simplejson
 import quiz_globals
+from questions_cache import question_iter
 
 def _get_simple_json_message(message):
     return simplejson.dumps(dict(type=message))
@@ -9,6 +10,7 @@ class Room():
     def __init__(self):
         self._players = []
         self._question_timer = None
+        self._question = None
 
 
     def add_player(self, player):
@@ -38,7 +40,9 @@ class Room():
 
 
     def start_quiz(self):
-        question_data = simplejson.dumps(dict(type = quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic='some topic', question='some question'))
+        self._question = next(question_iter)
+        question_data = simplejson.dumps(
+            dict(type = quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic=self._question[0], question=self._question[1]))
         self._send_all_players(question_data)
         self._question_timer = threading.Timer(12, self.show_answer)
         self._question_timer.start()
