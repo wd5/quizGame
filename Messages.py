@@ -1,6 +1,7 @@
 from quiz import rooms
 from room import Room
 import quiz_globals
+import simplejson
 
 def _get_room(room_number):
     if room_number in rooms:
@@ -22,6 +23,9 @@ def handle_message(message, room_number, ws):
 
     elif message_type == quiz_globals.ANSWER_QUERY_MESSAGE_TO_SERVER:
         room.wait_answer(ws)
+    elif message_type == quiz_globals.PLAYER_ANSWER_MESSAGE_TO_SERVER:
+        answer = message['answer']
+        room.check_players_answer(ws, answer)
         
 
 def handle_disconnect(room_number, ws):

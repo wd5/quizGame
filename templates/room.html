@@ -9,15 +9,36 @@
         $(document).ready(function(){
             if ("WebSocket" in window)
             {
+                var $answer_field = $('#answer_field');
                 var $answer_button = $('#answer_button');
+
+                $answer_field.keydown(function(event)
+                {
+                    if (event.which == 13)
+                    {
+                        var data = {
+                            type: '{{ PLAYER_ANSWER_MESSAGE_TO_SERVER }}',
+                            room: {{ room_number }},
+                            user: '4qwee',
+                            answer: $answer_field.val()
+                        };
+                        $answer_field.fadeOut();
+                        ws.send(JSON.stringify(data));
+                    }
+                });
+
                 $answer_button.click(function()
                 {
+                    $answer_button.fadeOut();
                     var data = {
                         type: '{{ ANSWER_QUERY_MESSAGE_TO_SERVER }}',
                         room: {{ room_number }},
                         user: '4qwee'
                     };
                     ws.send(JSON.stringify(data));
+
+                    $answer_field.fadeIn();
+                    $answer_field.focus();
                 });
 
                 ws = new WebSocket("ws://" + document.domain + ":5000/roomWS");
@@ -40,7 +61,7 @@
                         var $progress_bar = $('#progress_bar');
                         var progress = 0;
                         $progress_bar.css('width', 0);
-                        $answer_button.removeAttr('disabled');
+                        $answer_button.fadeIn();
 
                         $('#topic-span').text(data.topic);
                         $('#question-span').text(data.question);
@@ -53,13 +74,21 @@
                             if (progress == 100)
                             {
                                 clearInterval(timerInterval);
-                                $answer_button.attr('disabled', 'disabled');
+                                $answer_button.fadeOut();
                             }
                         }, 1000);
                     }
                     else if (data.type == '{{ STOP_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
                         $answer_button.attr('disabled', 'disabled');
+                    }
+                    else if (data.type == '{{ CORRECT_ANSWER_MESSAGE_TO_CLIENT }}')
+                    {
+
+                    }
+                    else if (data.type == '{{ INCORRECT_ANSWER_MESSAGE_TO_CLIENT }}')
+                    {
+
                     }
                 };
             }
@@ -80,13 +109,19 @@
 
             <div class="lead">
                 <strong id='topic-span'></strong>
+                <hr>
                 <p id="question-span">Обождите. Сейчас машина придумает вам вопрос
             </div>
         </div>
     </div>
     <div class="row-fluid">
+        <div class="span4 offset4">
+            <input id="answer_field" type="text" placeholder="Ваш ответ" class="span12" style="display: none">
+        </div>
+    </div>
+    <div class="row-fluid">
         <div class="span2 offset5">
-            <button id="answer_button" class="btn btn-danger btn-block btn-large">Ответ</button>
+            <button id="answer_button" class="btn btn-danger btn-block btn-large">Ответить!</button>
         </div>
     </div>
 </div>
