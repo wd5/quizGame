@@ -60,9 +60,9 @@ class Room():
 
     def handle_player_answer(self, player, is_correct):
         if is_correct:
-            player.send(quiz_globals.CORRECT_ANSWER_MESSAGE_TO_CLIENT)
+            player.send(_get_simple_json_message(quiz_globals.CORRECT_ANSWER_MESSAGE_TO_CLIENT))
         else:
-            player.send(quiz_globals.INCORRECT_ANSWER_MESSAGE_TO_CLIENT)
+            player.send(_get_simple_json_message(quiz_globals.INCORRECT_ANSWER_MESSAGE_TO_CLIENT))
         self.show_answer()
 
 

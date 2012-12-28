@@ -3,12 +3,17 @@
 <head>
     <title>Room {{ room_number }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='humane/css/jackedup.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.8.3.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='humane/js/humane.min.js') }}"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
             if ("WebSocket" in window)
             {
+                var success_msg = humane.create({baseCls:'humane-jackedup', addnCls:'humane-jackedup-success'});
+                var fault_msg = humane.create({baseCls:'humane-jackedup', addnCls:'humane-jackedup-error'});
+
                 var $answer_field = $('#answer_field');
                 var $answer_button = $('#answer_button');
 
@@ -37,6 +42,7 @@
                     };
                     ws.send(JSON.stringify(data));
 
+                    $answer_field.val('');
                     $answer_field.fadeIn();
                     $answer_field.focus();
                 });
@@ -84,11 +90,11 @@
                     }
                     else if (data.type == '{{ CORRECT_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
-
+                        success_msg.log('Правильно!');
                     }
                     else if (data.type == '{{ INCORRECT_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
-
+                        fault_msg.log('Неправильно!');
                     }
                 };
             }
