@@ -16,6 +16,7 @@
 
                 var $answer_field = $('#answer_field');
                 var $answer_button = $('#answer_button');
+                var $answer_span = $('#answer-span');
 
                 $answer_field.keydown(function(event)
                 {
@@ -65,6 +66,7 @@
 
                     if (data.type == '{{ QUESTION_MESSAGE_TO_CLIENT }}')
                     {
+                        $answer_span.text('');
                         $answer_button.fadeIn();
 
                         $('#topic-span').text(data.topic);
@@ -74,7 +76,7 @@
                     }
                     else if (data.type == '{{ STOP_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
-                        $answer_button.attr('disabled', 'disabled');
+                        $answer_button.fadeOut();
                     }
                     else if (data.type == '{{ CORRECT_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
@@ -84,6 +86,34 @@
                     {
                         fault_msg.log('Неправильно!');
                     }
+                    else if (data.type == '{{ ANSWER_MESSAGE_TO_CLIENT }}')
+                    {
+                        $answer_span.text(data.answer);
+                    }
+                };
+
+                var globalTimerInterval = 0;
+
+                var restartTimer = function()
+                {
+                    if (globalTimerInterval)
+                        clearInterval(globalTimerInterval);
+
+                    var $progress_bar = $('#progress_bar');
+                    var progress = 0;
+                    $progress_bar.css('width', 0);
+
+                    globalTimerInterval = setInterval(function()
+                    {
+                        progress += 10;
+                        $progress_bar.css('width', progress + '%');
+
+                        if (progress == 100)
+                        {
+                            clearInterval(globalTimerInterval);
+                            $answer_button.fadeOut();
+                        }
+                    }, 1000);
                 };
             }
             else
@@ -91,30 +121,6 @@
                 alert("WebSocket not supported");
             }
         });
-
-        var globalTimerInterval = 0;
-
-        var restartTimer = function()
-        {
-            if (globalTimerInterval)
-                clearInterval(globalTimerInterval);
-
-            var $progress_bar = $('#progress_bar');
-            var progress = 0;
-            $progress_bar.css('width', 0);
-
-            globalTimerInterval = setInterval(function()
-            {
-                progress += 10;
-                $progress_bar.css('width', progress + '%');
-
-                if (progress == 100)
-                {
-                    clearInterval(globalTimerInterval);
-                    $answer_button.fadeOut();
-                }
-            }, 1000);
-        };
     </script>
 </head>
 <body>
@@ -129,6 +135,7 @@
                 <strong id='topic-span'></strong>
                 <hr>
                 <p id="question-span">Обождите. Сейчас машина придумает вам вопрос
+                <p id="answer-span" class="lead">
             </div>
         </div>
     </div>

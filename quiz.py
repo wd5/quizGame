@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 from geventwebsocket.handler import WebSocketHandler
 from gevent.pywsgi import WSGIServer
 import simplejson
-import Messages
+import messages
 import quiz_globals
 
 app = Flask(__name__)
@@ -31,12 +31,12 @@ def rooms_ws():
             message = ws.receive()
 
             if message is None:
-                Messages.handle_disconnect(room_number, ws)
+                messages.handle_disconnect(room_number, ws)
                 break
             else:
                 message = simplejson.loads(message)
                 room_number = int(message['room'])
-                Messages.handle_message(message, room_number, ws)
+                messages.handle_message(message, room_number, ws)
 
     return
 

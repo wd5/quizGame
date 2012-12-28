@@ -51,7 +51,7 @@ class Room():
 
 
     def show_answer(self):
-        self._send_all_players(simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE_TO_CLIENT, answer='answer')))
+        self._send_all_players(simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE_TO_CLIENT, answer=self._question[2])))
 
         if self.players_count():
             self._question_timer = threading.Timer(5, self.start_quiz)
