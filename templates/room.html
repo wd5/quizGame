@@ -42,6 +42,7 @@
                     };
                     ws.send(JSON.stringify(data));
 
+                    restartTimer();
                     $answer_field.val('');
                     $answer_field.fadeIn();
                     $answer_field.focus();
@@ -64,25 +65,12 @@
 
                     if (data.type == '{{ QUESTION_MESSAGE_TO_CLIENT }}')
                     {
-                        var $progress_bar = $('#progress_bar');
-                        var progress = 0;
-                        $progress_bar.css('width', 0);
                         $answer_button.fadeIn();
 
                         $('#topic-span').text(data.topic);
                         $('#question-span').text(data.question);
 
-                        var timerInterval = setInterval(function()
-                        {
-                            progress += 10;
-                            $progress_bar.css('width', progress + '%');
-
-                            if (progress == 100)
-                            {
-                                clearInterval(timerInterval);
-                                $answer_button.fadeOut();
-                            }
-                        }, 1000);
+                        restartTimer();
                     }
                     else if (data.type == '{{ STOP_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
@@ -103,6 +91,30 @@
                 alert("WebSocket not supported");
             }
         });
+
+        var globalTimerInterval = 0;
+
+        var restartTimer = function()
+        {
+            if (globalTimerInterval)
+                clearInterval(globalTimerInterval);
+
+            var $progress_bar = $('#progress_bar');
+            var progress = 0;
+            $progress_bar.css('width', 0);
+
+            globalTimerInterval = setInterval(function()
+            {
+                progress += 10;
+                $progress_bar.css('width', progress + '%');
+
+                if (progress == 100)
+                {
+                    clearInterval(globalTimerInterval);
+                    $answer_button.fadeOut();
+                }
+            }, 1000);
+        };
     </script>
 </head>
 <body>
