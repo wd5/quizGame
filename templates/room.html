@@ -7,6 +7,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.8.3.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='humane/js/humane.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.cookie.js') }}"></script>
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
             if ("WebSocket" in window)
@@ -115,6 +116,21 @@
                         }
                     }, 1000);
                 };
+
+                var $name_input = $('#name-input');
+                var saved_name = $.cookie('{{ NAME_COOKIE }}');
+                var $name_modal = $('#name-modal');
+
+                if (!saved_name)
+                    $name_modal.modal();
+                else
+                    $name_input.val(saved_name);
+
+                $('#save_name_btn').click(function()
+                {
+                    $.cookie('{{ NAME_COOKIE }}', $name_input.val())
+                    $name_modal.modal('hide');
+                });
             }
             else
             {
@@ -124,19 +140,20 @@
     </script>
 </head>
 <body>
+<a href="#name-modal" role="button" class="btn" data-toggle="modal" style="position: absolute; top: 10px; right: 10px">Я хочу представиться</a>
+
 <div class="container-fluid">
     <div class="row-fluid">
-        <div class="span6 offset3 well" style="margin-top: 30pt">
+        <div class="span6 offset3 well" style="margin-top: 30pt" style="font-size: 25pt">
             <div class="progress progress-striped active">
                 <div class="bar" style="width: 0" id="progress_bar"></div>
             </div>
 
-            <div class="lead">
-                <strong id='topic-span'></strong>
-                <hr>
-                <p id="question-span">Обождите. Сейчас машина придумает вам вопрос
-                <p id="answer-span" class="lead">
-            </div>
+            <p id='topic-span' class="lead">
+            <hr>
+            <p id="question-span">Обождите. Сейчас машина придумает вам вопрос
+            <hr>
+            <p id="answer-span">
         </div>
     </div>
     <div class="row-fluid">
@@ -148,6 +165,22 @@
         <div class="span2 offset5">
             <button id="answer_button" class="btn btn-danger btn-block btn-large">Ответить!</button>
         </div>
+    </div>
+</div>
+
+<div id="name-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="modalLabel">Давай закомиться!</h3>
+    </div>
+    <div class="modal-body">
+        <div>
+            <input id="name-input" type="text" placeholder="Ваше имя" class="input-block-level">
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Не хочу</button>
+        <button class="btn btn-primary" id="save_name_btn">Хорошо</button>
     </div>
 </div>
 </body>
