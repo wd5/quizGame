@@ -17,26 +17,30 @@ rooms = {}
 def index():
     return render_template('index.html', rooms_keys=rooms.keys())
 
+
 @app.route('/room/<int:room>')
 def room(room):
     return render_template('room.html', room_number=room)
+
 
 @app.route('/roomWS')
 def rooms_ws():
     if 'wsgi.websocket' in request.environ:
         ws = request.environ['wsgi.websocket']
         room_number = None
+        player_name = None
 
         while True:
             message = ws.receive()
 
             if message is None:
-                messages.handle_disconnect(room_number, ws)
+                messages.handle_disconnect(room_number, player_name)
                 break
             else:
                 message = simplejson.loads(message)
                 room_number = int(message['room'])
-                messages.handle_message(message, room_number, ws)
+                player_name = message['user']
+                messages.handle_message(message, room_number, player_name, ws)
 
     return
 

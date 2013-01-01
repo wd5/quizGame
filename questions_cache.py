@@ -33,6 +33,6 @@ def get_question_iter():
         topic = next(get_topic())
 
         for i, question in enumerate(topic.questions):
-            yield (topic.topic_name, question, topic.answers[i])
+            yield (topic.topic_name, question, topic.answers[i], (i + 1) * 10)
 
 question_iter = get_question_iter()

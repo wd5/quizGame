@@ -19,16 +19,21 @@
                 var $answer_button = $('#answer_button');
                 var $answer_span = $('#answer-span');
 
+                var get_data_template = function(type_def)
+                {
+                    return {
+                        type: type_def,
+                        room: {{ room_number }},
+                        user:$.cookie('{{ NAME_COOKIE }}')
+                    };
+                };
+
                 $answer_field.keydown(function(event)
                 {
                     if (event.which == 13)
                     {
-                        var data = {
-                            type: '{{ PLAYER_ANSWER_MESSAGE_TO_SERVER }}',
-                            room: {{ room_number }},
-                            user: '4qwee',
-                            answer: $answer_field.val()
-                        };
+                        var data = get_data_template('{{ PLAYER_ANSWER_MESSAGE_TO_SERVER }}');
+                        data.answer = $answer_field.val();
                         $answer_field.fadeOut();
                         ws.send(JSON.stringify(data));
                     }
@@ -37,11 +42,7 @@
                 $answer_button.click(function()
                 {
                     $answer_button.fadeOut();
-                    var data = {
-                        type: '{{ ANSWER_QUERY_MESSAGE_TO_SERVER }}',
-                        room: {{ room_number }},
-                        user: '4qwee'
-                    };
+                    var data = get_data_template('{{ ANSWER_QUERY_MESSAGE_TO_SERVER }}');
                     ws.send(JSON.stringify(data));
 
                     restartTimer();
@@ -53,10 +54,7 @@
                 ws = new WebSocket("ws://" + document.domain + ":5000/roomWS");
                 ws.onopen = function()
                 {
-                    var data = {
-                        type: '{{ START_LISTENING_MESSAGE_TO_SERVER }}',
-                        room: {{ room_number }}
-                    };
+                    var data = get_data_template('{{ START_LISTENING_MESSAGE_TO_SERVER }}');
                     ws.send(JSON.stringify(data));
                 };
                 ws.onmessage = function(event)
