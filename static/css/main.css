@@ -1,0 +1,7 @@
+#scores-table th {
+    text-align: right;
+}
+
+#scores-table td {
+    padding-left: 10pt;
+}

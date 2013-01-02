@@ -1,11 +1,13 @@
 import threading
 import simplejson
+from geventwebsocket import WebSocketError
 import quiz_globals
 import functools
 from questions_cache import get_question_iter
 
 def _get_simple_json_message(message):
     return simplejson.dumps(dict(type=message))
+
 
 class Room():
     def __init__(self):
@@ -19,6 +21,7 @@ class Room():
     def add_player(self, player_name, player_socket):
         self._players_sockets[player_name] = player_socket
         self._players_scores[player_name] = 0
+        self._change_player_score(player_name, 0)# show new player in scores
 
         if self.players_count() == 1:
             self.start_quiz()
@@ -35,7 +38,10 @@ class Room():
 
     def _send_all_players(self, data):
         for player_socket in self._players_sockets.values():
-            player_socket.send(data)
+            try:
+                player_socket.send(data)
+            except WebSocketError:
+                pass#todo add autodelete players
 
 
     def _send_all_players_except_one(self, except_player_name, data):
@@ -54,14 +60,15 @@ class Room():
     def start_quiz(self):
         self._question = next(self._question_iter)
         question_data = simplejson.dumps(
-            dict(type = quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic=self._question[0], question=self._question[1]))
+            dict(type=quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic=self._question[0], question=self._question[1]))
         self._send_all_players(question_data)
         self._question_timer = threading.Timer(12, self.show_answer)
         self._question_timer.start()
 
 
     def show_answer(self):
-        self._send_all_players(simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE_TO_CLIENT, answer=self._question[2])))
+        self._send_all_players(
+            simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE_TO_CLIENT, answer=self._question[2])))
 
         if self.players_count():
             self._question_timer = threading.Timer(5, self.start_quiz)
@@ -88,5 +95,7 @@ class Room():
 
     def wait_answer(self, player_name):
         self._question_timer.cancel()
-        self._send_all_players_except_one(player_name, _get_simple_json_message(quiz_globals.STOP_ANSWER_MESSAGE_TO_CLIENT))
-        self._question_timer = threading.Timer(10, functools.partial(self.handle_player_answer, is_correct=False, player_name=player_name))
+        self._send_all_players_except_one(player_name,
+            _get_simple_json_message(quiz_globals.STOP_ANSWER_MESSAGE_TO_CLIENT))
+        self._question_timer = threading.Timer(10,
+            functools.partial(self.handle_player_answer, is_correct=False, player_name=player_name))

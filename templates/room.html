@@ -4,6 +4,7 @@
     <title>Room {{ room_number }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='humane/css/jackedup.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.8.3.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='humane/js/humane.min.js') }}"></script>
@@ -89,6 +90,14 @@
                     {
                         $answer_span.text(data.answer);
                     }
+                    else if (data.type == '{{ SCORES_CHANGED_MESSAGE_TO_CLIENT }}')
+                    {
+                        var $scores_table = $('#scores-table');
+                        $scores_table.empty();
+
+                        for (var player in data.scores)
+                            $scores_table.append('<tr><th>' + player + '</th><td>' + data.scores[player] + '</td></tr>')
+                    }
                 };
 
                 var globalTimerInterval = 0;
@@ -137,31 +146,47 @@
         });
     </script>
 </head>
-<body>
-<a href="#name-modal" role="button" class="btn" data-toggle="modal" style="position: absolute; top: 10px; right: 10px">Я хочу представиться</a>
+<body style="background-image: url('{{ url_for('static', filename='img/nasty_fabric.png') }}')">
 
 <div class="container-fluid">
     <div class="row-fluid">
-        <div class="span6 offset3 well" style="margin-top: 30pt" style="font-size: 25pt">
-            <div class="progress progress-striped active">
-                <div class="bar" style="width: 0" id="progress_bar"></div>
+        <div class="container-fluid span3">
+            <div class="row-fluid" style="margin-top: 10pt">
+                <a href="#name-modal" role="button" class="btn" data-toggle="modal">
+                    Меня зовут
+                </a>
             </div>
+            <div class="row-fluid" style="margin-top: 20pt">
+                <div class="well well-large span12">
+                    <table id="scores-table"></table>
+                </div>
+            </div>
+        </div>
 
-            <p id='topic-span' class="lead">
-            <hr>
-            <p id="question-span">Обождите. Сейчас машина придумает вам вопрос
-            <hr>
-            <p id="answer-span">
-        </div>
-    </div>
-    <div class="row-fluid">
-        <div class="span4 offset4">
-            <input id="answer_field" type="text" placeholder="Ваш ответ" class="span12" style="display: none">
-        </div>
-    </div>
-    <div class="row-fluid">
-        <div class="span2 offset5">
-            <button id="answer_button" class="btn btn-danger btn-block btn-large">Ответить!</button>
+        <div class="container-fluid span9">
+            <div class="row-fluid">
+                <div class="span12 well" style="margin-top: 10pt">
+                    <div class="progress progress-striped active">
+                        <div class="bar" style="width: 0" id="progress_bar"></div>
+                    </div>
+
+                    <p id='topic-span' class="lead">
+                    <hr>
+                    <p id="question-span">Обождите. Сейчас машина придумает вам вопрос
+                    <hr>
+                    <p id="answer-span">
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span4 offset4">
+                    <input id="answer_field" type="text" placeholder="Ваш ответ" class="span12" style="display: none">
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="span2 offset5">
+                    <button id="answer_button" class="btn btn-danger btn-block btn-large">Ответить!</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
