@@ -37,6 +37,7 @@
                         data.answer = $answer_field.val();
                         $answer_field.fadeOut();
                         ws.send(JSON.stringify(data));
+                        clearInterval(globalTimerInterval);
                     }
                 });
 
@@ -77,6 +78,7 @@
                     else if (data.type == '{{ STOP_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
                         $answer_button.fadeOut();
+                        clearInterval(globalTimerInterval);
                     }
                     else if (data.type == '{{ CORRECT_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
@@ -85,6 +87,7 @@
                     else if (data.type == '{{ INCORRECT_ANSWER_MESSAGE_TO_CLIENT }}')
                     {
                         fault_msg.log('Неправильно!');
+                        $answer_field.fadeOut();
                     }
                     else if (data.type == '{{ ANSWER_MESSAGE_TO_CLIENT }}')
                     {
@@ -129,7 +132,12 @@
                 var $name_modal = $('#name-modal');
 
                 if (!saved_name)
+                {
+                    saved_name = 'user' + Math.floor(Math.random() * 1000);
+                    $.cookie('{{ NAME_COOKIE }}', saved_name);
+                    $name_input.val(saved_name);
                     $name_modal.modal();
+                }
                 else
                     $name_input.val(saved_name);
 
@@ -198,7 +206,8 @@
     </div>
     <div class="modal-body">
         <div>
-            <input id="name-input" type="text" placeholder="Ваше имя" class="input-block-level">
+            <label for="name-input" class="control-label">Вас зовут</label>
+            <input id="name-input" type="text" class="input-block-level">
         </div>
     </div>
     <div class="modal-footer">

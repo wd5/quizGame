@@ -3,7 +3,6 @@ from questions import Topic
 from quiz_globals import QUESTIONS_CACHE_SIZE
 
 
-
 _connection = MySQLdb.connect(host='127.0.0.1', user='chgk_user', passwd='password', db='questions', charset='utf8')
 _cursor = _connection.cursor()
 
@@ -28,11 +27,18 @@ def get_topic():
 
         yield Topic(topic_data)
 
+
 def get_question_iter():
     while True:
         topic = next(get_topic())
 
         for i, question in enumerate(topic.questions):
-            yield (topic.topic_name, question, topic.answers[i], (i + 1) * 10)
+            try:
+                question_data = (topic.topic_name, question, topic.answers[i], (i + 1) * 10)
+            except IndexError:
+                print topic.topic_name, topic.questions, topic.answers
+                raise IndexError()
+
+            yield question_data
 
 question_iter = get_question_iter()

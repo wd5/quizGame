@@ -99,3 +99,4 @@ class Room():
             _get_simple_json_message(quiz_globals.STOP_ANSWER_MESSAGE_TO_CLIENT))
         self._question_timer = threading.Timer(10,
             functools.partial(self.handle_player_answer, is_correct=False, player_name=player_name))
+        self._question_timer.start()
