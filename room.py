@@ -60,7 +60,7 @@ class Room():
     def start_quiz(self):
         self._question = next(self._question_iter)
         question_data = simplejson.dumps(
-            dict(type=quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic=self._question[0], question=self._question[1]))
+            dict(type=quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic=self._question[0], question=self._question[1], price=self._question[3]))
         self._send_all_players(question_data)
         self._question_timer = threading.Timer(12, self.show_answer)
         self._question_timer.start()

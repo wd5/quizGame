@@ -18,7 +18,7 @@
 
                 var $answer_field = $('#answer_field');
                 var $answer_button = $('#answer_button');
-                var $answer_span = $('#answer-span');
+                var $answer_div = $('#answer-div');
 
                 var get_data_template = function(type_def)
                 {
@@ -67,11 +67,15 @@
 
                     if (data.type == '{{ QUESTION_MESSAGE_TO_CLIENT }}')
                     {
-                        $answer_span.text('');
+                        $answer_div.slideUp(200, function()
+                        {
+                            $answer_div.text('');
+                        });
                         $answer_button.fadeIn();
 
-                        $('#topic-span').text(data.topic);
-                        $('#question-span').text(data.question);
+                        $('#topic-div').text(data.topic);
+                        $('#question-div').text(data.question);
+                        $('#price-div').text(data.price);
 
                         restartTimer();
                     }
@@ -91,7 +95,8 @@
                     }
                     else if (data.type == '{{ ANSWER_MESSAGE_TO_CLIENT }}')
                     {
-                        $answer_span.text(data.answer);
+                        $answer_div.text(data.answer);
+                        $answer_div.slideDown();
                     }
                     else if (data.type == '{{ SCORES_CHANGED_MESSAGE_TO_CLIENT }}')
                     {
@@ -178,11 +183,10 @@
                         <div class="bar" style="width: 0" id="progress_bar"></div>
                     </div>
 
-                    <p id='topic-span' class="lead">
-                    <hr>
-                    <p id="question-span">Обождите. Сейчас машина придумает вам вопрос
-                    <hr>
-                    <p id="answer-span">
+                    <div id='topic-div' class="lead" style="float: left; border-left: solid 5pt #696969; padding-left: 10pt"></div>
+                    <div id="price-div" class="lead" style="float: right; border-right: solid 5pt #696969; padding-right: 10pt"></div>
+                    <div id="question-div" style="clear: both">Обождите. Сейчас машина придумает вам вопрос</div>
+                    <div id="answer-div" style="margin-top: 10pt; display: none"></div>
                 </div>
             </div>
             <div class="row-fluid">
