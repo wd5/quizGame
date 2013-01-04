@@ -18,6 +18,9 @@ def handle_message(message, room_number, player_name, ws):
     if message_type == quiz_globals.START_LISTENING_MESSAGE_TO_SERVER:
         room.add_player(player_name, ws)
 
+        if room.players_count() == 1:
+            room.start_quiz()
+
         if room_number not in rooms:
             rooms[room_number] = room
 

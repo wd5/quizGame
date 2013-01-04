@@ -13,9 +13,9 @@ class Room():
     def __init__(self):
         self._players_sockets = {}
         self._players_scores = {}
-        self._question_timer = None
+        self._timer = None
         self._question = None
-        self._question_iter = get_question_iter()
+        self._question_iterable = get_question_iter()
         self._answered_players = []
 
 
@@ -23,9 +23,6 @@ class Room():
         self._players_sockets[player_name] = player_socket
         self._players_scores[player_name] = 0
         self._change_player_score(player_name, 0)# show new player in scores
-
-        if self.players_count() == 1:
-            self.start_quiz()
 
 
     def players_count(self):
@@ -37,45 +34,58 @@ class Room():
         del self._players_scores[player_name]
 
 
-    def _send_all_players(self, data):
-        for player_socket in self._players_sockets.values():
-            try:
-                player_socket.send(data)
-            except WebSocketError:
-                pass#todo add autodelete players
+    def _send_all_players(self, data, excluded_names=None):
+        if excluded_names is None:
+            for player_socket in self._players_sockets.values():
+                try:
+                    player_socket.send(data)
+                except WebSocketError:
+                    pass#todo add autodelete players
+        else:
+            for player_name in self._players_sockets:
+                if player_name not in excluded_names:
+                    try:
+                        self._players_sockets[player_name].send(data)
+                    except WebSocketError:
+                        pass#todo add autodelete players
 
 
-    def _send_all_players_except_one(self, except_player_name, data):
-        for player_name in self._players_sockets:
-            if player_name != except_player_name:
-                self._players_sockets[player_name].send(data)
+    def start_new_task(self, task, time):
+        if self._timer is not None:
+            self._timer.cancel()
 
-    def _send_all_players_except_many(self, except_players_names, data):
-        for player_name in self._players_sockets:
-            if player_name not in except_players_names:
-                self._players_sockets[player_name].send(data)
+        self._timer = threading.Timer(time, task)
+        self._timer.start()
 
 
     def _change_player_score(self, player_name, delta_score):
         self._players_scores[player_name] += delta_score
-
         data = simplejson.dumps(dict(type=quiz_globals.SCORES_CHANGED_MESSAGE_TO_CLIENT, scores=self._players_scores))
         self._send_all_players(data)
 
 
     def start_quiz(self, new_round=True):
         if new_round:
-            self._question = next(self._question_iter)
+            self._question = next(self._question_iterable)
+
         question_data = simplejson.dumps(
-            dict(type=quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic=self._question[0], question=self._question[1], price=self._question[3]))
+            dict(type=quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic=self._question[0], question=self._question[1],
+                price=self._question[3]))
 
         if new_round:
             self._send_all_players(question_data)
         else:
-            self._send_all_players_except_many(self._answered_players, question_data)
+            self._send_all_players(question_data, self._answered_players)
 
-        self._question_timer = threading.Timer(10, self.show_answer)
-        self._question_timer.start()
+        self.start_new_task(self.start_new_round, 10)
+
+
+    def start_new_round(self):
+        self.show_answer()
+
+        if self.players_count():
+            self._answered_players = []
+            self.start_new_task(self.start_quiz, 5)
 
 
     def show_answer(self, player_name=None):
@@ -83,10 +93,6 @@ class Room():
 
         if player_name is None:
             self._send_all_players(message)
-
-            if self.players_count():
-                self._question_timer = threading.Timer(5, self.start_quiz)
-                self._question_timer.start()
         else:
             self._players_sockets[player_name].send(message)
 
@@ -108,26 +114,17 @@ class Room():
 
             if self.players_count() == len(self._answered_players):
                 self.start_new_round()
-
-            self.start_quiz(False)
+            else:
+                self.start_quiz(False)
         else:
             self.start_new_round()
 
 
-    def start_new_round(self):
-        self._answered_players = []
-        self.show_answer()
-
-
     def check_players_answer(self, player_name, answer):
-        self._question_timer.cancel()
         self.handle_player_answer(player_name, answer.lower() == self._question[2].lower().strip(' ."\''))
 
 
     def wait_answer(self, player_name):
-        self._question_timer.cancel()
-        self._send_all_players_except_one(player_name,
-            _get_simple_json_message(quiz_globals.STOP_ANSWER_MESSAGE_TO_CLIENT))
-        self._question_timer = threading.Timer(10,
-            functools.partial(self.handle_player_answer, is_correct=False, player_name=player_name))
-        self._question_timer.start()
+        self._send_all_players(_get_simple_json_message(quiz_globals.STOP_ANSWER_MESSAGE_TO_CLIENT), [player_name])
+        handle_incorrect_answer = functools.partial(self.handle_player_answer, is_correct=False, player_name=player_name)
+        self.start_new_task(handle_incorrect_answer, 10)
