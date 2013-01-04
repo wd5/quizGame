@@ -16,6 +16,7 @@ class Room():
         self._question_timer = None
         self._question = None
         self._question_iter = get_question_iter()
+        self._answered_players = []
 
 
     def add_player(self, player_name, player_socket):
@@ -49,6 +50,11 @@ class Room():
             if player_name != except_player_name:
                 self._players_sockets[player_name].send(data)
 
+    def _send_all_players_except_many(self, except_players_names, data):
+        for player_name in self._players_sockets:
+            if player_name not in except_players_names:
+                self._players_sockets[player_name].send(data)
+
 
     def _change_player_score(self, player_name, delta_score):
         self._players_scores[player_name] += delta_score
@@ -57,22 +63,32 @@ class Room():
         self._send_all_players(data)
 
 
-    def start_quiz(self):
-        self._question = next(self._question_iter)
+    def start_quiz(self, new_round=True):
+        if new_round:
+            self._question = next(self._question_iter)
         question_data = simplejson.dumps(
             dict(type=quiz_globals.QUESTION_MESSAGE_TO_CLIENT, topic=self._question[0], question=self._question[1], price=self._question[3]))
-        self._send_all_players(question_data)
-        self._question_timer = threading.Timer(12, self.show_answer)
+
+        if new_round:
+            self._send_all_players(question_data)
+        else:
+            self._send_all_players_except_many(self._answered_players, question_data)
+
+        self._question_timer = threading.Timer(10, self.show_answer)
         self._question_timer.start()
 
 
-    def show_answer(self):
-        self._send_all_players(
-            simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE_TO_CLIENT, answer=self._question[2])))
+    def show_answer(self, player_name=None):
+        message = simplejson.dumps(dict(type=quiz_globals.ANSWER_MESSAGE_TO_CLIENT, answer=self._question[2]))
 
-        if self.players_count():
-            self._question_timer = threading.Timer(5, self.start_quiz)
-            self._question_timer.start()
+        if player_name is None:
+            self._send_all_players(message)
+
+            if self.players_count():
+                self._question_timer = threading.Timer(5, self.start_quiz)
+                self._question_timer.start()
+        else:
+            self._players_sockets[player_name].send(message)
 
 
     def handle_player_answer(self, player_name, is_correct):
@@ -83,8 +99,23 @@ class Room():
             message = _get_simple_json_message(quiz_globals.INCORRECT_ANSWER_MESSAGE_TO_CLIENT)
             delta_score = -self._question[3]
 
-        self._send_all_players(message)
+        self._players_sockets[player_name].send(message)
         self._change_player_score(player_name, delta_score)
+
+        if not is_correct:
+            self.show_answer(player_name)
+            self._answered_players.append(player_name)
+
+            if self.players_count() == len(self._answered_players):
+                self.start_new_round()
+
+            self.start_quiz(False)
+        else:
+            self.start_new_round()
+
+
+    def start_new_round(self):
+        self._answered_players = []
         self.show_answer()
 
 
