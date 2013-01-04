@@ -97,7 +97,7 @@ class Room():
             self._players_sockets[player_name].send(message)
 
 
-    def handle_player_answer(self, player_name, is_correct):
+    def handle_player_answer(self, player_name, is_correct, answer):
         if is_correct:
             message = _get_simple_json_message(quiz_globals.CORRECT_ANSWER_MESSAGE_TO_CLIENT)
             delta_score = self._question[3]
@@ -112,6 +112,10 @@ class Room():
             self.show_answer(player_name)
             self._answered_players.append(player_name)
 
+            message = simplejson.dumps(dict(type=quiz_globals.INCORRECT_ANSWER_ANOTHER_PLAYER_MESSAGE_TO_CLIENT,
+                player=player_name, answer=answer))
+            self._send_all_players(message, [player_name])
+
             if self.players_count() == len(self._answered_players):
                 self.start_new_round()
             else:
@@ -121,7 +125,7 @@ class Room():
 
 
     def check_players_answer(self, player_name, answer):
-        self.handle_player_answer(player_name, answer.lower() == self._question[2].lower().strip(' ."\''))
+        self.handle_player_answer(player_name, answer.lower() == self._question[2].lower().strip(' ."\''), answer)
 
 
     def wait_answer(self, player_name):

@@ -93,6 +93,10 @@
                         fault_msg.log('Неправильно!');
                         $answer_field.fadeOut();
                     }
+                    else if (data.type == '{{ INCORRECT_ANSWER_ANOTHER_PLAYER_MESSAGE_TO_CLIENT }}')
+                    {
+                        fault_msg.log(data.player + ' ответил неправильно "' + data.answer + '"');
+                    }
                     else if (data.type == '{{ ANSWER_MESSAGE_TO_CLIENT }}')
                     {
                         $answer_div.text(data.answer);
