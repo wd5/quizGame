@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, g
 from geventwebsocket.handler import WebSocketHandler
 from gevent.pywsgi import WSGIServer
 import simplejson
@@ -27,6 +27,7 @@ def room(room):
 def rooms_ws():
     if 'wsgi.websocket' in request.environ:
         ws = request.environ['wsgi.websocket']
+        g.rooms = rooms
         room_number = None
         player_name = None
 
