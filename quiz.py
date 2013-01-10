@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, g
+from flask import Flask, render_template, request, g, redirect, url_for
 from geventwebsocket.handler import WebSocketHandler
 from gevent.pywsgi import WSGIServer
 import simplejson
 import messages
 import quiz_globals
+import random
 
 app = Flask(__name__)
 
@@ -12,6 +13,7 @@ for constant in all_constants:
     app.jinja_env.globals[constant] = getattr(quiz_globals, constant)
 
 rooms = {}
+all_rooms = set(range(1000))
 
 @app.route('/')
 def index():
@@ -21,6 +23,11 @@ def index():
 @app.route('/room/<int:room>')
 def room(room):
     return render_template('room.html', room_number=room)
+
+
+@app.route('/room/random')
+def random_room():
+    return redirect(url_for('room', room=random.choice(list(all_rooms - set(rooms.keys())))))
 
 
 @app.route('/roomWS')

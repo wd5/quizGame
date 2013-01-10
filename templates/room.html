@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Room {{ room_number }}</title>
+    <title>Комната №{{ room_number }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='humane/css/jackedup.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
@@ -152,8 +152,9 @@
 
                 $('#save_name_btn').click(function()
                 {
-                    $.cookie('{{ NAME_COOKIE }}', $name_input.val())
+                    $.cookie('{{ NAME_COOKIE }}', $name_input.val());
                     $name_modal.modal('hide');
+                    window.location.reload();
                 });
             }
             else

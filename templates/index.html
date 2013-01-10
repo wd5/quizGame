@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Rooms</title>
+    <title>Комнаты</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.8.3.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 </head>
-<body>
+<body style="background-image: url('{{ url_for('static', filename='img/nasty_fabric.png') }}')">
     <div class="container-fluid" style="margin-top: 10pt">
         <div class="row-fluid">
             <ul class="thumbnails span12">
                 {% for room in rooms_keys %}
                 <li class="span1" style="text-align: center; cursor: pointer" onclick="window.location.href = '{{ url_for('room', room=room) }}'">
 {#                    <a href="{{ url_for('room', room=room) }}">#}
-                        <div class="thumbnail" onclick="">
+                        <div class="thumbnail" onclick="" style="background-color: #ffffff">
                             <h2>{{ room }}</h2>
                         </div>
 {#                    </a>#}
@@ -22,6 +22,9 @@
                     Вы знаете, сейчас совсем никто не играет
                 {% endfor %}
             </ul>
+        </div>
+        <div class="row-fluid">
+            <button class="btn btn-large" id="new_room" onclick="window.location.href = '{{ url_for('random_room') }}'">Создать новую комнату</button>
         </div>
     </div>
 </body>
